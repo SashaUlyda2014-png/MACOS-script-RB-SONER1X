@@ -6,6 +6,7 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
 local KEY_SYSTEM = "67GAZAN22867HYRASTENDOFF2"
+local KEY_LINK = "https://direct-link.net/5554630/6YQ8vYMDUDeR"
 
 local Settings = {
     Fly = false, FlySpeed = 60, AimLock = false, Chams = false,
@@ -57,7 +58,7 @@ local function StartSonix()
     StrokeA.Thickness = 1.5
     makeDraggable(AppleBtn)
 
-    -- ГЛАВНОЕ МЕНЮ (С твоим ником)
+    -- ГЛАВНОЕ МЕНЮ
     local Main = Instance.new("Frame", sg)
     Main.Size = UDim2.new(0, 400, 0, 400)
     Main.Position = UDim2.new(0.5, -200, 0.5, -200)
@@ -236,9 +237,9 @@ local function StartSonix()
     end)
 end
 
--- Лоадер (С твоим ником)
+-- Лоадер
 local Loader = Instance.new("Frame", sg)
-Loader.Size = UDim2.new(0, 320, 0, 180); Loader.Position = UDim2.new(0.5, -160, 0.4, 0)
+Loader.Size = UDim2.new(0, 320, 0, 220); Loader.Position = UDim2.new(0.5, -160, 0.4, 0)
 Loader.BackgroundColor3 = Color3.fromRGB(255, 255, 255); Instance.new("UICorner", Loader).CornerRadius = UDim.new(0, 20)
 Instance.new("UIStroke", Loader).Color = Color3.fromRGB(200, 200, 200)
 makeDraggable(Loader)
@@ -247,12 +248,25 @@ local LT = Instance.new("TextLabel", Loader)
 LT.Size = UDim2.new(1, 0, 0, 40); LT.Text = "Soner1x LOGIN"; LT.TextColor3 = Color3.new(0,0,0); LT.BackgroundTransparency = 1
 
 local LI = Instance.new("TextBox", Loader)
-LI.Size = UDim2.new(0, 240, 0, 45); LI.Position = UDim2.new(0.5, -120, 0.3, 0)
+LI.Size = UDim2.new(0, 240, 0, 45); LI.Position = UDim2.new(0.5, -120, 0.25, 0)
 LI.PlaceholderText = "KEY"; LI.BackgroundColor3 = Color3.fromRGB(245, 245, 245); LI.TextColor3 = Color3.new(0,0,0)
 Instance.new("UICorner", LI)
 
+-- Кнопка GET KEY
+local GK = Instance.new("TextButton", Loader)
+GK.Size = UDim2.new(0, 110, 0, 40); GK.Position = UDim2.new(0.5, -120, 0.55, 0)
+GK.Text = "GET KEY"; GK.BackgroundColor3 = Color3.fromRGB(230, 230, 230); GK.TextColor3 = Color3.new(0, 0, 0)
+Instance.new("UICorner", GK); GK.MouseButton1Click:Connect(function()
+    setclipboard(KEY_LINK) -- Копирует в буфер (для ПК)
+    -- В Роблоксе нет прямой функции "открыть браузер", обычно копируют ссылку
+    GK.Text = "COPIED"
+    wait(2)
+    GK.Text = "GET KEY"
+end)
+
+-- Кнопка ACTIVATE
 local LB = Instance.new("TextButton", Loader)
-LB.Size = UDim2.new(0, 140, 0, 45); LB.Position = UDim2.new(0.5, -70, 0.65, 0)
+LB.Size = UDim2.new(0, 110, 0, 40); LB.Position = UDim2.new(0.5, 10, 0.55, 0)
 LB.Text = "ACTIVATE"; LB.BackgroundColor3 = Color3.fromRGB(0, 0, 0); LB.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", LB)
 
