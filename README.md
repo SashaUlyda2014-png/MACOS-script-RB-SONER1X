@@ -15,6 +15,7 @@ local SESSION_FILE = "soner1x_session.json"
 
 local Settings = {
     WalkSpeed = 16, InfJump = false, NoClip = false, Spider = false, Bhop = false,
+    Fly = false, FlySpeed = 50,
     FullBright = false, BoxESP = false, Chams = false, Hitbox = false, HitboxSize = 5,
     AimLock = false, Trigger = false, NoRecoil = false, Spin = false, SpinSpeed = 60,
     AntiAFK = true, StoredPos = nil
@@ -27,7 +28,7 @@ local OriginalLighting = {
 }
 
 local sg = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-sg.Name = "Soner1x_Win11_V14"
+sg.Name = "Soner1x_Win11_V15"
 sg.ResetOnSpawn = false
 
 -- Dragging Logic
@@ -75,23 +76,23 @@ local function StartSonix()
     WinTrigger.Size = UDim2.new(1, 0, 1, 0); WinTrigger.BackgroundTransparency = 1; WinTrigger.Text = ""
     WinTrigger.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
 
-    -- LARGE Navigation Bar (Slides)
+    -- Navigation Bar (LARGE)
     local Nav = Instance.new("Frame", Main)
     Nav.Size = UDim2.new(1, 0, 0, 60); Nav.BackgroundTransparency = 0.95; Nav.BackgroundColor3 = Color3.new(0,0,0)
     
     local TabMain = Instance.new("TextButton", Nav)
-    TabMain.Size = UDim2.new(0.5, 0, 1, 0); TabMain.Text = "MAIN"; TabMain.Font = Enum.Font.GothamBold; TabMain.TextSize = 18
+    TabMain.Size = UDim2.new(0.5, 0, 1, 0); TabMain.Text = "MAIN"; TabMain.Font = Enum.Font.GothamBold; TabMain.TextSize = 20
     TabMain.BackgroundTransparency = 1; TabMain.TextColor3 = Color3.fromRGB(0, 103, 192)
 
     local TabMisc = Instance.new("TextButton", Nav)
     TabMisc.Size = UDim2.new(0.5, 0, 1, 0); TabMisc.Position = UDim2.new(0.5, 0, 0, 0)
-    TabMisc.Text = "MISC / SERVER"; TabMisc.Font = Enum.Font.GothamBold; TabMisc.TextSize = 18
+    TabMisc.Text = "MISC / SERVER"; TabMisc.Font = Enum.Font.GothamBold; TabMisc.TextSize = 20
     TabMisc.BackgroundTransparency = 1; TabMisc.TextColor3 = Color3.fromRGB(120, 120, 120)
 
     local Indicator = Instance.new("Frame", Nav)
-    Indicator.Size = UDim2.new(0.4, 0, 0, 3); Indicator.Position = UDim2.new(0.05, 0, 0.9, 0); Indicator.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
+    Indicator.Size = UDim2.new(0.4, 0, 0, 4); Indicator.Position = UDim2.new(0.05, 0, 0.9, 0); Indicator.BackgroundColor3 = Color3.fromRGB(0, 120, 215)
 
-    -- Pages
+    -- Scrolling Pages
     local PageMain = Instance.new("ScrollingFrame", Main)
     PageMain.Size = UDim2.new(1, -20, 1, -80); PageMain.Position = UDim2.new(0, 10, 0, 70)
     PageMain.BackgroundTransparency = 1; PageMain.CanvasSize = UDim2.new(0, 0, 2.5, 0); PageMain.ScrollBarThickness = 2
@@ -101,15 +102,15 @@ local function StartSonix()
     PageMisc.BackgroundTransparency = 1; PageMisc.CanvasSize = UDim2.new(0, 0, 2.5, 0); PageMisc.Visible = false; PageMisc.ScrollBarThickness = 2
 
     TabMain.MouseButton1Click:Connect(function()
-        PageMain.Visible = true; PageMisc.Visible = false; Indicator:TweenPosition(UDim2.new(0.05, 0, 0.9, 0), "Out", "Quad", 0.2)
+        PageMain.Visible = true; PageMisc.Visible = false; Indicator:TweenPosition(UDim2.new(0.05, 0, 0.9, 0), "Out", "Quad", 0.25)
         TabMain.TextColor3 = Color3.fromRGB(0, 103, 192); TabMisc.TextColor3 = Color3.fromRGB(120, 120, 120)
     end)
     TabMisc.MouseButton1Click:Connect(function()
-        PageMain.Visible = false; PageMisc.Visible = true; Indicator:TweenPosition(UDim2.new(0.55, 0, 0.9, 0), "Out", "Quad", 0.2)
+        PageMain.Visible = false; PageMisc.Visible = true; Indicator:TweenPosition(UDim2.new(0.55, 0, 0.9, 0), "Out", "Quad", 0.25)
         TabMisc.TextColor3 = Color3.fromRGB(0, 103, 192); TabMain.TextColor3 = Color3.fromRGB(120, 120, 120)
     end)
 
-    -- SET Menu
+    -- SET Panel
     local SetMenu = Instance.new("Frame", sg)
     SetMenu.Size = UDim2.new(0, 200, 0, 130); SetMenu.Position = UDim2.new(0.5, 240, 0.5, -65)
     SetMenu.BackgroundColor3 = Color3.new(1, 1, 1); SetMenu.Visible = false; Instance.new("UICorner", SetMenu)
@@ -122,8 +123,9 @@ local function StartSonix()
     local function openSet(name, current, step, cb)
         if SetMenu.Visible and SetTitle.Text == name then SetMenu.Visible = false return end
         SetMenu.Visible = true; SetTitle.Text = name; SetVal.Text = tostring(current)
-        local c1 = Minus.MouseButton1Click:Connect(function() current = current - step; SetVal.Text = tostring(current); cb(current) end)
-        local c2 = Plus.MouseButton1Click:Connect(function() current = current + step; SetVal.Text = tostring(current); cb(current) end)
+        local c1, c2
+        c1 = Minus.MouseButton1Click:Connect(function() current = current - step; SetVal.Text = tostring(current); cb(current) end)
+        c2 = Plus.MouseButton1Click:Connect(function() current = current + step; SetVal.Text = tostring(current); cb(current) end)
         task.spawn(function() repeat task.wait() until not SetMenu.Visible; c1:Disconnect(); c2:Disconnect() end)
     end
 
@@ -155,16 +157,16 @@ local function StartSonix()
         end
     end
 
-    -- MAIN TAB Content
-    addRow(PageMain, "WalkSpeed", 0, "dummy", function() openSet("SPEED", Settings.WalkSpeed, 5, function(v) Settings.WalkSpeed = v end) end)
-    addRow(PageMain, "Infinity Jump", 50, "InfJump")
-    addRow(PageMain, "No Clip", 100, "NoClip")
-    addRow(PageMain, "Auto Bhop", 150, "Bhop")
-    addRow(PageMain, "Aim Assist", 200, "AimLock")
-    addRow(PageMain, "Hitbox Expander", 250, "Hitbox", function() openSet("HITBOX", Settings.HitboxSize, 2, function(v) Settings.HitboxSize = v end) end)
-    addRow(PageMain, "Trigger Bot", 300, "Trigger")
+    -- MAIN TAB
+    addRow(PageMain, "Fly Mode", 0, "Fly", function() openSet("FLY SPEED", Settings.FlySpeed, 10, function(v) Settings.FlySpeed = v end) end)
+    addRow(PageMain, "WalkSpeed", 50, "dummy", function() openSet("SPEED", Settings.WalkSpeed, 5, function(v) Settings.WalkSpeed = v end) end)
+    addRow(PageMain, "Infinity Jump", 100, "InfJump")
+    addRow(PageMain, "No Clip", 150, "NoClip")
+    addRow(PageMain, "Auto Bhop", 200, "Bhop")
+    addRow(PageMain, "Aim Assist", 250, "AimLock")
+    addRow(PageMain, "Hitbox Expander", 300, "Hitbox", function() openSet("HITBOX", Settings.HitboxSize, 2, function(v) Settings.HitboxSize = v end) end)
 
-    -- MISC TAB Content
+    -- MISC TAB
     addRow(PageMisc, "Full Brightness", 0, "FullBright")
     addRow(PageMisc, "Box ESP", 50, "BoxESP")
     addRow(PageMisc, "Chams (Glow)", 100, "Chams")
@@ -186,19 +188,34 @@ local function StartSonix()
     end)
     addBtn(PageMisc, "REJOIN SERVER", 360, function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end)
 
-    -- Loops
+    -- Fly Logic
+    RunService.RenderStepped:Connect(function()
+        local char = LocalPlayer.Character
+        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+        if Settings.Fly and hrp then
+            local vel = Vector3.new(0, 0, 0)
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then vel = vel + Camera.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then vel = vel - Camera.CFrame.LookVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then vel = vel - Camera.CFrame.RightVector end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then vel = vel + Camera.CFrame.RightVector end
+            hrp.Velocity = vel * Settings.FlySpeed
+            hrp.CFrame = CFrame.new(hrp.Position, hrp.Position + Camera.CFrame.LookVector)
+        end
+    end)
+
+    -- Standard Loops
     RunService.Stepped:Connect(function()
         local char = LocalPlayer.Character; if not char then return end
         local hum = char:FindFirstChildOfClass("Humanoid")
         local hrp = char:FindFirstChild("HumanoidRootPart")
-        if hum then hum.WalkSpeed = Settings.WalkSpeed end
+        if hum and not Settings.Fly then hum.WalkSpeed = Settings.WalkSpeed end
         if Settings.Bhop and hum and hum.MoveDirection.Magnitude > 0 and hum.FloorMaterial ~= Enum.Material.Air then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
         if Settings.FullBright then Lighting.Ambient = Color3.new(1,1,1); Lighting.Brightness = 2; Lighting.ClockTime = 14 end
         if Settings.Spin and hrp then hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(Settings.SpinSpeed/10), 0) end
         for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = not Settings.NoClip end end
     end)
 
-    -- Fixed Infinity Jump Logic
+    -- Inf Jump Fix
     UserInputService.JumpRequest:Connect(function()
         if Settings.InfJump then
             local char = LocalPlayer.Character
@@ -208,6 +225,7 @@ local function StartSonix()
         end
     end)
 
+    -- Visuals
     RunService.RenderStepped:Connect(function()
         for _, p in pairs(Players:GetPlayers()) do
             if p ~= LocalPlayer and p.Character then
@@ -260,7 +278,7 @@ if checkSession() then
     StartSonix()
 else
     local Loader = Instance.new("Frame", sg); Loader.Size = UDim2.new(0, 300, 0, 220); Loader.Position = UDim2.new(0.5, -150, 0.4, 0); Loader.BackgroundColor3 = Color3.new(1,1,1); Instance.new("UICorner", Loader); makeDraggable(Loader)
-    local Title = Instance.new("TextLabel", Loader); Title.Size = UDim2.new(1,0,0,40); Title.Text = "SONER1X V14"; Title.Font = Enum.Font.GothamBold; Title.BackgroundTransparency = 1
+    local Title = Instance.new("TextLabel", Loader); Title.Size = UDim2.new(1,0,0,40); Title.Text = "SONER1X V15"; Title.Font = Enum.Font.GothamBold; Title.BackgroundTransparency = 1
     local LI = Instance.new("TextBox", Loader); LI.Size = UDim2.new(0, 240, 0, 40); LI.Position = UDim2.new(0.5, -120, 0.3, 0); LI.PlaceholderText = "ENTER KEY"; LI.BackgroundColor3 = Color3.fromRGB(240,240,240); Instance.new("UICorner", LI)
     local GK = Instance.new("TextButton", Loader); GK.Size = UDim2.new(0, 115, 0, 40); GK.Position = UDim2.new(0.5, -120, 0.65, 0); GK.Text = "GET KEY"; GK.BackgroundColor3 = Color3.fromRGB(230,230,230); Instance.new("UICorner", GK)
     local LB = Instance.new("TextButton", Loader); LB.Size = UDim2.new(0, 115, 0, 40); LB.Position = UDim2.new(0.5, 5, 0.65, 0); LB.Text = "LOGIN"; LB.BackgroundColor3 = Color3.fromRGB(0, 120, 215); LB.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", LB)
