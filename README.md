@@ -15,7 +15,7 @@ local Settings = {
 }
 
 local sg = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-sg.Name = "Soner1x_ULTIMATE"
+sg.Name = "Soner1x_ULTIMATE_V2"
 sg.ResetOnSpawn = false
 
 local function makeDraggable(obj)
@@ -60,8 +60,8 @@ local function StartSonix()
 
     -- ГЛАВНОЕ МЕНЮ
     local Main = Instance.new("Frame", sg)
-    Main.Size = UDim2.new(0, 400, 0, 400)
-    Main.Position = UDim2.new(0.5, -200, 0.5, -200)
+    Main.Size = UDim2.new(0, 400, 0, 450) -- Чуть увеличил под новую кнопку
+    Main.Position = UDim2.new(0.5, -200, 0.5, -225)
     Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
     Main.BackgroundTransparency = 0.15
     Main.Visible = true
@@ -87,7 +87,7 @@ local function StartSonix()
     Scroll.Size = UDim2.new(1, -30, 1, -70)
     Scroll.Position = UDim2.new(0, 15, 0, 55)
     Scroll.BackgroundTransparency = 1
-    Scroll.CanvasSize = UDim2.new(0, 0, 1.8, 0)
+    Scroll.CanvasSize = UDim2.new(0, 0, 2.2, 0) -- Увеличил Canvas под список
     Scroll.ScrollBarThickness = 0
 
     local function createSlider(name, val, cb)
@@ -132,7 +132,11 @@ local function StartSonix()
             active = not active
             b.BackgroundColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(240, 240, 240)
             b.TextColor3 = active and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(50, 50, 50)
-            if active then Instance.new("UIStroke", b).Color = Color3.fromRGB(0, 0, 0) else
+            if active then 
+                local st = Instance.new("UIStroke", b)
+                st.Color = Color3.fromRGB(0, 0, 0)
+                st.Thickness = 1.2
+            else
                 local s = b:FindFirstChildOfClass("UIStroke") if s then s:Destroy() end
             end
             cb(active)
@@ -145,38 +149,52 @@ local function StartSonix()
         end
     end
 
-    addRow("Fly Hack", 0, function(v) Settings.Fly = v end)
-    addRow("Walk Speed", 50, function() end, function() speedS.Visible = not speedS.Visible end)
-    addRow("Spin Bot", 100, function(v) Settings.Spin = v end, function() spinS.Visible = not spinS.Visible end)
-    addRow("Aim Assist", 150, function(v) Settings.AimLock = v end)
-    addRow("ESP Chams", 200, function(v) Settings.Chams = v end)
-    addRow("Force Night", 250, function(v) Settings.IsDay = not v end)
+    -- Список функций
+    addRow("Fly Hack (V1)", 0, function(v) Settings.Fly = v end)
+    
+    -- ТВОЯ НОВАЯ КНОПКА FLY TWO
+    addRow("Fly Two (External)", 50, function(v) 
+        if v then
+            pcall(function()
+                loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
+            end)
+        end
+    end)
 
-    addRow("Set Location", 310, function() 
+    addRow("Walk Speed", 100, function() end, function() speedS.Visible = not speedS.Visible end)
+    addRow("Spin Bot", 150, function(v) Settings.Spin = v end, function() spinS.Visible = not spinS.Visible end)
+    addRow("Aim Assist", 200, function(v) Settings.AimLock = v end)
+    addRow("ESP Chams", 250, function(v) Settings.Chams = v end)
+    addRow("Force Night", 300, function(v) Settings.IsDay = not v end)
+
+    addRow("Set Location", 360, function() 
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
             Settings.StoredPos = LocalPlayer.Character.HumanoidRootPart.CFrame
         end
     end)
-    addRow("TP to Saved", 360, function() 
+    addRow("TP to Saved", 410, function() 
         if Settings.StoredPos and LocalPlayer.Character then
             LocalPlayer.Character.HumanoidRootPart.CFrame = Settings.StoredPos
         end
     end)
-    addRow("TP to Player", 410, function() 
+    addRow("TP to Player", 460, function() 
         local pList = Players:GetPlayers()
-        local randomP = pList[math.random(1, #pList)]
-        if randomP ~= LocalPlayer and randomP.Character then
-            LocalPlayer.Character.HumanoidRootPart.CFrame = randomP.Character.HumanoidRootPart.CFrame
+        if #pList > 1 then
+            local randomP = pList[math.random(1, #pList)]
+            while randomP == LocalPlayer do randomP = pList[math.random(1, #pList)] end
+            if randomP.Character then
+                LocalPlayer.Character.HumanoidRootPart.CFrame = randomP.Character.HumanoidRootPart.CFrame
+            end
         end
     end)
 
-    -- КНОПКИ ПОЛЕТА
+    -- КНОПКИ ПОЛЕТА ДЛЯ V1
     local fUI = Instance.new("Frame", sg); fUI.Size = UDim2.new(1,0,1,0); fUI.BackgroundTransparency = 1; fUI.Visible = false
     local function fb(id, t, p)
         local b = Instance.new("TextButton", fUI); b.Size = UDim2.new(0,65,0,65); b.Position = p; b.Text = t
         b.BackgroundColor3 = Color3.new(1, 1, 1); b.BackgroundTransparency = 0.3; b.TextColor3 = Color3.new(0, 0, 0)
         Instance.new("UICorner", b).CornerRadius = UDim.new(0, 15)
-        Instance.new("UIStroke", b).Color = Color3.fromRGB(200, 200, 200)
+        local str = Instance.new("UIStroke", b); str.Color = Color3.fromRGB(200, 200, 200)
         b.MouseButton1Down:Connect(function() inputFlags[id] = true end)
         b.MouseButton1Up:Connect(function() inputFlags[id] = false end)
     end
@@ -188,6 +206,7 @@ local function StartSonix()
     fb("up", "FLY +", UDim2.new(0.85, 0, 0.65, 0))
     fb("down", "FLY -", UDim2.new(0.85, 0, 0.8, 0))
 
+    -- Основной цикл работы
     RunService.RenderStepped:Connect(function()
         local char = LocalPlayer.Character; if not char then return end
         local hrp = char:FindFirstChild("HumanoidRootPart"); local hum = char:FindFirstChildOfClass("Humanoid")
@@ -241,11 +260,11 @@ end
 local Loader = Instance.new("Frame", sg)
 Loader.Size = UDim2.new(0, 320, 0, 220); Loader.Position = UDim2.new(0.5, -160, 0.4, 0)
 Loader.BackgroundColor3 = Color3.fromRGB(255, 255, 255); Instance.new("UICorner", Loader).CornerRadius = UDim.new(0, 20)
-Instance.new("UIStroke", Loader).Color = Color3.fromRGB(200, 200, 200)
+local StrokeL = Instance.new("UIStroke", Loader); StrokeL.Color = Color3.fromRGB(200, 200, 200)
 makeDraggable(Loader)
 
 local LT = Instance.new("TextLabel", Loader)
-LT.Size = UDim2.new(1, 0, 0, 40); LT.Text = "Soner1x LOGIN"; LT.TextColor3 = Color3.new(0,0,0); LT.BackgroundTransparency = 1
+LT.Size = UDim2.new(1, 0, 0, 40); LT.Text = "Soner1x LOGIN"; LT.TextColor3 = Color3.new(0,0,0); LT.BackgroundTransparency = 1; LT.Font = Enum.Font.GothamBold
 
 local LI = Instance.new("TextBox", Loader)
 LI.Size = UDim2.new(0, 240, 0, 45); LI.Position = UDim2.new(0.5, -120, 0.25, 0)
@@ -257,10 +276,9 @@ local GK = Instance.new("TextButton", Loader)
 GK.Size = UDim2.new(0, 110, 0, 40); GK.Position = UDim2.new(0.5, -120, 0.55, 0)
 GK.Text = "GET KEY"; GK.BackgroundColor3 = Color3.fromRGB(230, 230, 230); GK.TextColor3 = Color3.new(0, 0, 0)
 Instance.new("UICorner", GK); GK.MouseButton1Click:Connect(function()
-    setclipboard(KEY_LINK) -- Копирует в буфер (для ПК)
-    -- В Роблоксе нет прямой функции "открыть браузер", обычно копируют ссылку
+    if setclipboard then setclipboard(KEY_LINK) end
     GK.Text = "COPIED"
-    wait(2)
+    task.wait(2)
     GK.Text = "GET KEY"
 end)
 
@@ -271,5 +289,5 @@ LB.Text = "ACTIVATE"; LB.BackgroundColor3 = Color3.fromRGB(0, 0, 0); LB.TextColo
 Instance.new("UICorner", LB)
 
 LB.MouseButton1Click:Connect(function()
-    if LI.Text == KEY_SYSTEM then Loader:Destroy(); StartSonix() else LB.Text = "WRONG" end
+    if LI.Text == KEY_SYSTEM then Loader:Destroy(); StartSonix() else LB.Text = "WRONG" task.wait(1) LB.Text = "ACTIVATE" end
 end)
