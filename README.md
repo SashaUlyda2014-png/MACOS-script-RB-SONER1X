@@ -2,29 +2,52 @@ local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
+
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
+local Mouse = LocalPlayer:GetMouse()
 
 local KEY_SYSTEM = "67GAZAN22867HYRASTENDOFF2"
 local KEY_LINK = "https://direct-link.net/5554630/6YQ8vYMDUDeR"
 
 local Settings = {
-    Fly = false, FlySpeed = 60, AimLock = false, Chams = false,
-    IsDay = true, WalkSpeed = 16, Spin = false, SpinSpeed = 60,
+    Fly = false, FlySpeed = 60, AimLock = false, Chams = false, BoxESP = false,
+    WalkSpeed = 16, Spin = false, SpinSpeed = 60,
+    InfJump = false, Hitbox = false, HitboxSize = 5,
+    FullBright = false, AntiAFK = true, NoClip = false,
+    Bhop = false, Spider = false, Trigger = false, NoRecoil = false,
     StoredPos = nil
 }
 
+local OriginalLighting = {
+    Ambient = Lighting.Ambient,
+    OutdoorAmbient = Lighting.OutdoorAmbient,
+    Brightness = Lighting.Brightness,
+    ClockTime = Lighting.ClockTime
+}
+
+-- Anti-AFK
+pcall(function()
+    LocalPlayer.Idled:Connect(function()
+        if Settings.AntiAFK then
+            game:GetService("VirtualUser"):CaptureController()
+            game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+        end
+    end)
+end)
+
 local sg = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-sg.Name = "Soner1x_ULTIMATE_V2"
+sg.Name = "Soner1x_HUB_V11"
 sg.ResetOnSpawn = false
 
 local function makeDraggable(obj)
     local dragging, dragStart, startPos
     obj.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = obj.Position
+            dragging = true; dragStart = input.Position; startPos = obj.Position
         end
     end)
     UserInputService.InputChanged:Connect(function(input)
@@ -37,257 +60,205 @@ local function makeDraggable(obj)
 end
 
 local function StartSonix()
-    local inputFlags = {forward = false, back = false, left = false, right = false, up = false, down = false}
-    local bv = Instance.new("BodyVelocity")
-    local bg = Instance.new("BodyGyro")
-    bv.MaxForce = Vector3.new(1e6, 1e6, 1e6)
-    bg.MaxTorque = Vector3.new(1e6, 1e6, 1e6)
-
-    -- СВЕТЛАЯ КНОПКА APPLE
-    local AppleBtn = Instance.new("TextButton", sg)
-    AppleBtn.Size = UDim2.new(0, 60, 0, 60)
-    AppleBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
-    AppleBtn.Text = ""
-    AppleBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    AppleBtn.BackgroundTransparency = 0.2
-    AppleBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
-    AppleBtn.TextSize = 35
-    Instance.new("UICorner", AppleBtn).CornerRadius = UDim.new(0, 18)
-    local StrokeA = Instance.new("UIStroke", AppleBtn)
-    StrokeA.Color = Color3.fromRGB(200, 200, 200)
-    StrokeA.Thickness = 1.5
-    makeDraggable(AppleBtn)
-
-    -- ГЛАВНОЕ МЕНЮ
+    -- Главное окно
     local Main = Instance.new("Frame", sg)
-    Main.Size = UDim2.new(0, 400, 0, 450) -- Чуть увеличил под новую кнопку
-    Main.Position = UDim2.new(0.5, -200, 0.5, -225)
-    Main.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-    Main.BackgroundTransparency = 0.15
-    Main.Visible = true
-    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 24)
-    local StrokeM = Instance.new("UIStroke", Main)
-    StrokeM.Color = Color3.fromRGB(220, 220, 220)
-    StrokeM.Thickness = 2
+    Main.Size = UDim2.new(0, 420, 0, 520); Main.Position = UDim2.new(0.5, -210, 0.5, -260)
+    Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Main.BackgroundTransparency = 0.05
+    Main.Visible = true; Main.BorderSizePixel = 0
+    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 15)
     makeDraggable(Main)
 
-    AppleBtn.MouseButton1Click:Connect(function()
-        Main.Visible = not Main.Visible
-    end)
+    -- Логотип PornHub Style
+    local LogoContainer = Instance.new("Frame", Main)
+    LogoContainer.Size = UDim2.new(1, 0, 0, 60); LogoContainer.BackgroundTransparency = 1
+    
+    local NameLabel = Instance.new("TextLabel", LogoContainer)
+    NameLabel.Text = "Soner1x"; NameLabel.TextColor3 = Color3.new(1, 1, 1)
+    NameLabel.Font = Enum.Font.GothamBold; NameLabel.TextSize = 24
+    NameLabel.Size = UDim2.new(0, 110, 1, 0); NameLabel.Position = UDim2.new(0.2, 0, 0, 0); NameLabel.BackgroundTransparency = 1
 
-    local Title = Instance.new("TextLabel", Main)
-    Title.Size = UDim2.new(1, 0, 0, 50)
-    Title.Text = "Soner1x PREMIER"
-    Title.TextColor3 = Color3.fromRGB(40, 40, 40)
-    Title.BackgroundTransparency = 1
-    Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 18
+    local HubLabel = Instance.new("TextLabel", LogoContainer)
+    HubLabel.Text = "PREMIER"; HubLabel.TextColor3 = Color3.new(0, 0, 0)
+    HubLabel.Font = Enum.Font.GothamBold; HubLabel.TextSize = 24; HubLabel.BackgroundColor3 = Color3.fromRGB(255, 153, 0)
+    HubLabel.Size = UDim2.new(0, 120, 0, 35); HubLabel.Position = UDim2.new(0.48, 0, 0.2, 0)
+    Instance.new("UICorner", HubLabel).CornerRadius = UDim.new(0, 5)
+
+    local AppleBtn = Instance.new("TextButton", sg)
+    AppleBtn.Size = UDim2.new(0, 60, 0, 60); AppleBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
+    AppleBtn.Text = ""; AppleBtn.BackgroundColor3 = Color3.fromRGB(255, 153, 0)
+    AppleBtn.TextColor3 = Color3.new(0, 0, 0); AppleBtn.TextSize = 35; Instance.new("UICorner", AppleBtn)
+    AppleBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
+    makeDraggable(AppleBtn)
 
     local Scroll = Instance.new("ScrollingFrame", Main)
-    Scroll.Size = UDim2.new(1, -30, 1, -70)
-    Scroll.Position = UDim2.new(0, 15, 0, 55)
-    Scroll.BackgroundTransparency = 1
-    Scroll.CanvasSize = UDim2.new(0, 0, 2.2, 0) -- Увеличил Canvas под список
-    Scroll.ScrollBarThickness = 0
+    Scroll.Size = UDim2.new(1, -20, 1, -80); Scroll.Position = UDim2.new(0, 10, 0, 70)
+    Scroll.BackgroundTransparency = 1; Scroll.CanvasSize = UDim2.new(0, 0, 6, 0); Scroll.ScrollBarThickness = 2
+    Scroll.ScrollBarImageColor3 = Color3.fromRGB(255, 153, 0)
 
-    local function createSlider(name, val, cb)
-        local f = Instance.new("Frame", sg)
-        f.Size = UDim2.new(0, 170, 0, 100)
-        f.Position = UDim2.new(0.7, 0, 0.4, 0)
-        f.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        f.BackgroundTransparency = 0.1
-        f.Visible = false
-        Instance.new("UICorner", f).CornerRadius = UDim.new(0, 15)
-        Instance.new("UIStroke", f).Color = Color3.fromRGB(200, 200, 200)
-        makeDraggable(f)
-        local t = Instance.new("TextLabel", f)
-        t.Size = UDim2.new(1,0,0,30); t.Text = name; t.TextColor3 = Color3.new(0,0,0); t.BackgroundTransparency = 1
-        local v = Instance.new("TextLabel", f)
-        v.Size = UDim2.new(1,0,0,30); v.Position = UDim2.new(0,0,0.3,0)
-        v.Text = tostring(val); v.TextColor3 = Color3.fromRGB(100, 100, 100); v.BackgroundTransparency = 1
-        local m = Instance.new("TextButton", f)
-        m.Size = UDim2.new(0,40,0,40); m.Position = UDim2.new(0.1,0,0.55,0); m.Text = "-"
-        m.BackgroundColor3 = Color3.fromRGB(240,240,240); m.TextColor3 = Color3.new(0,0,0)
-        Instance.new("UICorner", m)
-        local p = Instance.new("TextButton", f)
-        p.Size = UDim2.new(0,40,0,40); p.Position = UDim2.new(0.65,0,0.55,0); p.Text = "+"
-        p.BackgroundColor3 = Color3.fromRGB(240,240,240); p.TextColor3 = Color3.new(0,0,0)
-        Instance.new("UICorner", p)
-        m.MouseButton1Click:Connect(function() v.Text = cb(-5) end)
-        p.MouseButton1Click:Connect(function() v.Text = cb(5) end)
-        return f
-    end
-
-    local speedS = createSlider("WALK SPEED", Settings.WalkSpeed, function(d) Settings.WalkSpeed = math.clamp(Settings.WalkSpeed+d, 0, 300) return Settings.WalkSpeed end)
-    local spinS = createSlider("SPIN POWER", Settings.SpinSpeed, function(d) Settings.SpinSpeed = math.clamp(Settings.SpinSpeed+d, 0, 1000) return Settings.SpinSpeed end)
-
-    local function addRow(name, y, cb, extra)
-        local b = Instance.new("TextButton", Scroll)
-        b.Size = UDim2.new(0, 280, 0, 40)
-        b.Position = UDim2.new(0, 5, 0, y)
-        b.Text = name; b.BackgroundColor3 = Color3.fromRGB(240, 240, 240); b.TextColor3 = Color3.fromRGB(50, 50, 50)
-        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 10)
-        local active = false
-        b.MouseButton1Click:Connect(function()
-            active = not active
-            b.BackgroundColor3 = active and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(240, 240, 240)
-            b.TextColor3 = active and Color3.fromRGB(0, 0, 0) or Color3.fromRGB(50, 50, 50)
-            if active then 
-                local st = Instance.new("UIStroke", b)
-                st.Color = Color3.fromRGB(0, 0, 0)
-                st.Thickness = 1.2
-            else
-                local s = b:FindFirstChildOfClass("UIStroke") if s then s:Destroy() end
-            end
-            cb(active)
-        end)
-        if extra then
-            local e = Instance.new("TextButton", Scroll)
-            e.Size = UDim2.new(0, 60, 0, 40); e.Position = UDim2.new(0, 295, 0, y)
-            e.Text = "SET"; e.BackgroundColor3 = Color3.fromRGB(220, 220, 220); e.TextColor3 = Color3.new(0, 0, 0)
-            Instance.new("UICorner", e).CornerRadius = UDim.new(0, 10); e.MouseButton1Click:Connect(extra)
-        end
-    end
-
-    -- Список функций
-    addRow("Fly Hack (V1)", 0, function(v) Settings.Fly = v end)
+    -- Настройки (SET)
+    local SetMenu = Instance.new("Frame", sg)
+    SetMenu.Size = UDim2.new(0, 220, 0, 130); SetMenu.Position = UDim2.new(0.5, 100, 0.5, -65)
+    SetMenu.BackgroundColor3 = Color3.fromRGB(25, 25, 25); SetMenu.Visible = false; Instance.new("UICorner", SetMenu)
+    local SetStroke = Instance.new("UIStroke", SetMenu); SetStroke.Color = Color3.fromRGB(255, 153, 0); SetStroke.Thickness = 2
+    makeDraggable(SetMenu)
     
-    -- ТВОЯ НОВАЯ КНОПКА FLY TWO
-    addRow("Fly Two (External)", 50, function(v) 
-        if v then
-            pcall(function()
-                loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
-            end)
-        end
-    end)
+    local SetTitle = Instance.new("TextLabel", SetMenu); SetTitle.Size = UDim2.new(1,0,0,30); SetTitle.Text = "ADJUST"; SetTitle.TextColor3 = Color3.new(1,1,1); SetTitle.BackgroundTransparency = 1
+    local SetVal = Instance.new("TextLabel", SetMenu); SetVal.Size = UDim2.new(1,0,0,30); SetVal.Position = UDim2.new(0,0,0.3,0); SetVal.Text = "0"; SetVal.TextColor3 = Color3.fromRGB(255, 153, 0); SetVal.BackgroundTransparency = 1
+    local Minus = Instance.new("TextButton", SetMenu); Minus.Size = UDim2.new(0,50,0,40); Minus.Position = UDim2.new(0.1,0,0.6,0); Minus.Text = "-"; Minus.BackgroundColor3 = Color3.fromRGB(40,40,40); Minus.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", Minus)
+    local Plus = Instance.new("TextButton", SetMenu); Plus.Size = UDim2.new(0,50,0,40); Plus.Position = UDim2.new(0.65,0,0.6,0); Plus.Text = "+"; Plus.BackgroundColor3 = Color3.fromRGB(255, 153, 0); Plus.TextColor3 = Color3.new(0,0,0); Instance.new("UICorner", Plus)
 
-    addRow("Walk Speed", 100, function() end, function() speedS.Visible = not speedS.Visible end)
-    addRow("Spin Bot", 150, function(v) Settings.Spin = v end, function() spinS.Visible = not spinS.Visible end)
-    addRow("Aim Assist", 200, function(v) Settings.AimLock = v end)
-    addRow("ESP Chams", 250, function(v) Settings.Chams = v end)
-    addRow("Force Night", 300, function(v) Settings.IsDay = not v end)
+    local currentSetConnection = nil
+    local function openSet(name, current, step, cb)
+        if SetMenu.Visible and SetTitle.Text == name then SetMenu.Visible = false return end
+        if currentSetConnection then currentSetConnection:Disconnect() end
+        SetMenu.Visible = true; SetTitle.Text = name; SetVal.Text = tostring(current)
+        local c1 = Minus.MouseButton1Click:Connect(function() current = current - step; SetVal.Text = tostring(current); cb(current) end)
+        local c2 = Plus.MouseButton1Click:Connect(function() current = current + step; SetVal.Text = tostring(current); cb(current) end)
+        currentSetConnection = RunService.Heartbeat:Connect(function() if not SetMenu.Visible then c1:Disconnect(); c2:Disconnect(); currentSetConnection:Disconnect() end end)
+    end
 
-    addRow("Set Location", 360, function() 
-        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            Settings.StoredPos = LocalPlayer.Character.HumanoidRootPart.CFrame
+    local function addRow(name, y, key, setCb)
+        local b = Instance.new("TextButton", Scroll)
+        b.Size = UDim2.new(0, 290, 0, 40); b.Position = UDim2.new(0, 5, 0, y)
+        b.Text = name; b.Font = Enum.Font.Gotham; b.TextColor3 = Color3.new(1,1,1)
+        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
+        
+        local function refresh()
+            b.BackgroundColor3 = Settings[key] and Color3.fromRGB(255, 153, 0) or Color3.fromRGB(40, 40, 40)
+            b.TextColor3 = Settings[key] and Color3.new(0,0,0) or Color3.new(1,1,1)
         end
-    end)
-    addRow("TP to Saved", 410, function() 
+        refresh()
+
+        b.MouseButton1Click:Connect(function()
+            Settings[key] = not Settings[key]
+            refresh()
+            if key == "FullBright" and not Settings[key] then
+                Lighting.Ambient = OriginalLighting.Ambient; Lighting.Brightness = OriginalLighting.Brightness; Lighting.ClockTime = OriginalLighting.ClockTime
+            end
+        end)
+
+        if setCb then
+            local s = Instance.new("TextButton", Scroll)
+            s.Size = UDim2.new(0, 60, 0, 40); s.Position = UDim2.new(0, 305, 0, y); s.Text = "SET"
+            s.BackgroundColor3 = Color3.fromRGB(60,60,60); s.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", s)
+            s.MouseButton1Click:Connect(setCb)
+        end
+    end
+
+    -- Функции
+    addRow("WalkSpeed", 0, "dummy", function() openSet("SPEED", Settings.WalkSpeed, 5, function(v) Settings.WalkSpeed = v end) end)
+    addRow("Infinity Jump", 50, "InfJump")
+    addRow("No Clip", 100, "NoClip")
+    addRow("Spider-Man", 150, "Spider")
+    addRow("Auto Bhop", 200, "Bhop")
+    addRow("Full Bright", 250, "FullBright")
+    addRow("Box ESP", 300, "BoxESP")
+    addRow("Chams ESP", 350, "Chams")
+    addRow("Hitbox Expander", 400, "Hitbox", function() openSet("HITBOX", Settings.HitboxSize, 2, function(v) Settings.HitboxSize = v end) end)
+    addRow("Aim Assist", 450, "AimLock")
+    addRow("Trigger Bot", 500, "Trigger")
+    addRow("No Recoil", 550, "NoRecoil")
+    addRow("Spin Bot", 600, "Spin", function() openSet("SPIN", Settings.SpinSpeed, 20, function(v) Settings.SpinSpeed = v end) end)
+
+    local function addBtn(name, y, cb)
+        local b = Instance.new("TextButton", Scroll); b.Size = UDim2.new(0, 360, 0, 40); b.Position = UDim2.new(0, 5, 0, y)
+        b.Text = name; b.BackgroundColor3 = Color3.fromRGB(50,50,50); b.TextColor3 = Color3.fromRGB(255, 153, 0); Instance.new("UICorner", b)
+        b.MouseButton1Click:Connect(cb)
+    end
+
+    addBtn("SAVE POSITION", 660, function() if LocalPlayer.Character then Settings.StoredPos = LocalPlayer.Character.HumanoidRootPart.CFrame end end)
+    addBtn("TP TO SAVED", 710, function()
         if Settings.StoredPos and LocalPlayer.Character then
+            LocalPlayer.Character.HumanoidRootPart.CFrame = Settings.StoredPos + Vector3.new(0,3,0)
+            task.wait(0.05)
             LocalPlayer.Character.HumanoidRootPart.CFrame = Settings.StoredPos
         end
     end)
-    addRow("TP to Player", 460, function() 
-        local pList = Players:GetPlayers()
-        if #pList > 1 then
-            local randomP = pList[math.random(1, #pList)]
-            while randomP == LocalPlayer do randomP = pList[math.random(1, #pList)] end
-            if randomP.Character then
-                LocalPlayer.Character.HumanoidRootPart.CFrame = randomP.Character.HumanoidRootPart.CFrame
+    addBtn("REJOIN SERVER", 760, function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end)
+    
+    local function findServer(isSmall)
+        local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder="..(isSmall and "Asc" or "Desc").."&limit=100"
+        local servers = HttpService:JSONDecode(game:HttpGet(url)).data
+        for _, s in pairs(servers) do if s.playing < s.maxPlayers and s.id ~= game.JobId then TeleportService:TeleportToPlaceInstance(game.PlaceId, s.id) break end end
+    end
+    addBtn("SMALL SERVER", 810, function() findServer(true) end)
+    addBtn("BIG SERVER", 860, function() findServer(false) end)
+
+    -- Aim Assist
+    RunService.RenderStepped:Connect(function()
+        if not Settings.AimLock then return end
+        local target = nil; local maxDist = 250
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
+                local pos, onScreen = Camera:WorldToViewportPoint(p.Character.Head.Position)
+                if onScreen then
+                    local dist = (Vector2.new(pos.X, pos.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
+                    if dist < maxDist then maxDist = dist; target = p.Character.Head end
+                end
+            end
+        end
+        if target then Camera.CFrame = Camera.CFrame:Lerp(CFrame.new(Camera.CFrame.Position, target.Position), 0.15) end
+    end)
+
+    -- Main Loop
+    RunService.Stepped:Connect(function()
+        local char = LocalPlayer.Character; if not char then return end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if hum then hum.WalkSpeed = Settings.WalkSpeed end
+        for _, v in pairs(char:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = not Settings.NoClip end end
+        if Settings.Spider and hrp then
+            local r = Ray.new(hrp.Position, hrp.CFrame.LookVector * 2.5)
+            if workspace:FindPartOnRay(r, char) then hrp.Velocity = Vector3.new(hrp.Velocity.X, 35, hrp.Velocity.Z) end
+        end
+        if Settings.Bhop and hum and hum.MoveDirection.Magnitude > 0 and hum.FloorMaterial ~= Enum.Material.Air then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
+        if Settings.FullBright then Lighting.Ambient = Color3.new(1,1,1); Lighting.Brightness = 2; Lighting.ClockTime = 14 end
+        if Settings.Spin and hrp then hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(Settings.SpinSpeed/10), 0) end
+    end)
+
+    -- Visuals
+    RunService.RenderStepped:Connect(function()
+        for _, p in pairs(Players:GetPlayers()) do
+            if p ~= LocalPlayer and p.Character then
+                local h = p.Character:FindFirstChild("Head")
+                if h then
+                    if Settings.Hitbox then
+                        h.Size = Vector3.new(Settings.HitboxSize, Settings.HitboxSize, Settings.HitboxSize)
+                        h.Transparency = 0.6; h.CanCollide = false
+                    else
+                        h.Size = Vector3.new(2, 1, 1); h.Transparency = 0
+                    end
+                end
+                local ch = p.Character:FindFirstChildOfClass("Highlight")
+                if Settings.Chams then if not ch then Instance.new("Highlight", p.Character) end elseif ch then ch:Destroy() end
+                
+                local b = p.Character:FindFirstChild("SonixBox")
+                if Settings.BoxESP then
+                    if not b then
+                        b = Instance.new("BoxHandleAdornment", p.Character); b.Name = "SonixBox"
+                        b.Size = Vector3.new(4, 6, 0.2); b.AlwaysOnTop = true; b.Adornee = p.Character
+                        b.Transparency = 0.5; b.Color3 = Color3.fromRGB(255, 153, 0)
+                    end
+                elseif b then b:Destroy() end
             end
         end
     end)
 
-    -- КНОПКИ ПОЛЕТА ДЛЯ V1
-    local fUI = Instance.new("Frame", sg); fUI.Size = UDim2.new(1,0,1,0); fUI.BackgroundTransparency = 1; fUI.Visible = false
-    local function fb(id, t, p)
-        local b = Instance.new("TextButton", fUI); b.Size = UDim2.new(0,65,0,65); b.Position = p; b.Text = t
-        b.BackgroundColor3 = Color3.new(1, 1, 1); b.BackgroundTransparency = 0.3; b.TextColor3 = Color3.new(0, 0, 0)
-        Instance.new("UICorner", b).CornerRadius = UDim.new(0, 15)
-        local str = Instance.new("UIStroke", b); str.Color = Color3.fromRGB(200, 200, 200)
-        b.MouseButton1Down:Connect(function() inputFlags[id] = true end)
-        b.MouseButton1Up:Connect(function() inputFlags[id] = false end)
-    end
-    
-    fb("forward", "UP", UDim2.new(0.08, 0, 0.65, 0))
-    fb("back", "DOWN", UDim2.new(0.08, 0, 0.8, 0))
-    fb("left", "LEFT", UDim2.new(0.01, 0, 0.725, 0))
-    fb("right", "RIGHT", UDim2.new(0.15, 0, 0.725, 0))
-    fb("up", "FLY +", UDim2.new(0.85, 0, 0.65, 0))
-    fb("down", "FLY -", UDim2.new(0.85, 0, 0.8, 0))
-
-    -- Основной цикл работы
-    RunService.RenderStepped:Connect(function()
-        local char = LocalPlayer.Character; if not char then return end
-        local hrp = char:FindFirstChild("HumanoidRootPart"); local hum = char:FindFirstChildOfClass("Humanoid")
-        if not (hrp and hum) then return end
-
-        hum.WalkSpeed = Settings.WalkSpeed
-        if Settings.Spin then hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(Settings.SpinSpeed/10), 0) end
-        
-        fUI.Visible = Settings.Fly
-        if Settings.Fly then
-            bv.Parent = hrp; bg.Parent = hrp; bg.CFrame = Camera.CFrame
-            local moveDir = Vector3.new(0,0,0)
-            if inputFlags.forward then moveDir = moveDir + Camera.CFrame.LookVector end
-            if inputFlags.back then moveDir = moveDir - Camera.CFrame.LookVector end
-            if inputFlags.left then moveDir = moveDir - Camera.CFrame.RightVector end
-            if inputFlags.right then moveDir = moveDir + Camera.CFrame.RightVector end
-            if inputFlags.up then moveDir = moveDir + Vector3.new(0,1,0) end
-            if inputFlags.down then moveDir = moveDir - Vector3.new(0,1,0) end
-            bv.Velocity = moveDir * Settings.FlySpeed; hum.PlatformStand = true
-        else
-            bv.Parent = nil; bg.Parent = nil; hum.PlatformStand = false
+    -- Inf Jump
+    UserInputService.JumpRequest:Connect(function()
+        if Settings.InfJump then
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
         end
-
-        if Settings.AimLock then
-            local target = nil; local dist = 500
-            for _, p in pairs(Players:GetPlayers()) do
-                if p ~= LocalPlayer and p.Character and p.Character:FindFirstChild("Head") then
-                    local pPos, onScreen = Camera:WorldToViewportPoint(p.Character.Head.Position)
-                    if onScreen then
-                        local mag = (Vector2.new(pPos.X, pPos.Y) - Vector2.new(Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2)).Magnitude
-                        if mag < dist then dist = mag; target = p.Character.Head end
-                    end
-                end
-            end
-            if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position) end
-        end
-
-        for _, p in pairs(Players:GetPlayers()) do
-            if p ~= LocalPlayer and p.Character then
-                local h = p.Character:FindFirstChild("Highlight")
-                if Settings.Chams then
-                    if not h then h = Instance.new("Highlight", p.Character); h.FillColor = Color3.fromRGB(255, 255, 255) end
-                elseif h then h:Destroy() end
-            end
-        end
-        Lighting.ClockTime = Settings.IsDay and 14 or 0
     end)
 end
 
--- Лоадер
-local Loader = Instance.new("Frame", sg)
-Loader.Size = UDim2.new(0, 320, 0, 220); Loader.Position = UDim2.new(0.5, -160, 0.4, 0)
-Loader.BackgroundColor3 = Color3.fromRGB(255, 255, 255); Instance.new("UICorner", Loader).CornerRadius = UDim.new(0, 20)
-local StrokeL = Instance.new("UIStroke", Loader); StrokeL.Color = Color3.fromRGB(200, 200, 200)
+-- Loader
+local Loader = Instance.new("Frame", sg); Loader.Size = UDim2.new(0, 320, 0, 240); Loader.Position = UDim2.new(0.5, -160, 0.4, 0); Loader.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Instance.new("UICorner", Loader)
+local LStroke = Instance.new("UIStroke", Loader); LStroke.Color = Color3.fromRGB(255, 153, 0); LStroke.Thickness = 2
 makeDraggable(Loader)
-
-local LT = Instance.new("TextLabel", Loader)
-LT.Size = UDim2.new(1, 0, 0, 40); LT.Text = "Soner1x LOGIN"; LT.TextColor3 = Color3.new(0,0,0); LT.BackgroundTransparency = 1; LT.Font = Enum.Font.GothamBold
-
-local LI = Instance.new("TextBox", Loader)
-LI.Size = UDim2.new(0, 240, 0, 45); LI.Position = UDim2.new(0.5, -120, 0.25, 0)
-LI.PlaceholderText = "KEY"; LI.BackgroundColor3 = Color3.fromRGB(245, 245, 245); LI.TextColor3 = Color3.new(0,0,0)
-Instance.new("UICorner", LI)
-
--- Кнопка GET KEY
-local GK = Instance.new("TextButton", Loader)
-GK.Size = UDim2.new(0, 110, 0, 40); GK.Position = UDim2.new(0.5, -120, 0.55, 0)
-GK.Text = "GET KEY"; GK.BackgroundColor3 = Color3.fromRGB(230, 230, 230); GK.TextColor3 = Color3.new(0, 0, 0)
-Instance.new("UICorner", GK); GK.MouseButton1Click:Connect(function()
-    if setclipboard then setclipboard(KEY_LINK) end
-    GK.Text = "COPIED"
-    task.wait(2)
-    GK.Text = "GET KEY"
-end)
-
--- Кнопка ACTIVATE
-local LB = Instance.new("TextButton", Loader)
-LB.Size = UDim2.new(0, 110, 0, 40); LB.Position = UDim2.new(0.5, 10, 0.55, 0)
-LB.Text = "ACTIVATE"; LB.BackgroundColor3 = Color3.fromRGB(0, 0, 0); LB.TextColor3 = Color3.new(1, 1, 1)
-Instance.new("UICorner", LB)
-
-LB.MouseButton1Click:Connect(function()
-    if LI.Text == KEY_SYSTEM then Loader:Destroy(); StartSonix() else LB.Text = "WRONG" task.wait(1) LB.Text = "ACTIVATE" end
-end)
+local LI = Instance.new("TextBox", Loader); LI.Size = UDim2.new(0, 240, 0, 45); LI.Position = UDim2.new(0.5, -120, 0.2, 0); LI.PlaceholderText = "ENTER KEY"; LI.BackgroundColor3 = Color3.fromRGB(30, 30, 30); LI.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", LI)
+local GK = Instance.new("TextButton", Loader); GK.Size = UDim2.new(0, 115, 0, 40); GK.Position = UDim2.new(0.5, -120, 0.5, 0); GK.Text = "GET KEY"; GK.BackgroundColor3 = Color3.fromRGB(40, 40, 40); GK.TextColor3 = Color3.new(1,1,1); Instance.new("UICorner", GK)
+local LB = Instance.new("TextButton", Loader); LB.Size = UDim2.new(0, 115, 0, 40); LB.Position = UDim2.new(0.5, 5, 0.5, 0); LB.Text = "LOGIN"; LB.BackgroundColor3 = Color3.fromRGB(255, 153, 0); LB.TextColor3 = Color3.new(0,0,0); Instance.new("UICorner", LB)
+GK.MouseButton1Click:Connect(function() if setclipboard then setclipboard(KEY_LINK) end end)
+LB.MouseButton1Click:Connect(function() if LI.Text == KEY_SYSTEM then Loader:Destroy(); StartSonix() end end)
