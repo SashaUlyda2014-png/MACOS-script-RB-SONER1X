@@ -10,7 +10,7 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 local Mouse = LocalPlayer:GetMouse()
 
-local KEY_SYSTEM = "67GAZAN22867HYRASTENDOFF2"
+local KEY_SYSTEM = "FREE_KEY35483272387438"
 local KEY_LINK = "https://direct-link.net/5554630/6YQ8vYMDUDeR"
 
 local Settings = {
